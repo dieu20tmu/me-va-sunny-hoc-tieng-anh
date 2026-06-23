@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Mẹ và Sunny học Tiếng Anh — 50 từ và 50 câu gần gũi trong mỗi chủ đề."
+    />
+    <title>Mẹ và Sunny học Tiếng Anh</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Mẹ và Sunny học Tiếng Anh - Trang chủ">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 42 42" role="img">
+            <path d="M21 35V17" />
+            <path d="M21 22c-8 0-12-5-12-12 8 0 12 5 12 12Z" />
+            <path d="M21 17c7 0 11-4 11-10-7 0-11 4-11 10Z" />
+          </svg>
+        </span>
+        <span>Mẹ và Sunny <strong>học Tiếng Anh</strong></span>
+      </a>
+
+      <nav aria-label="Điều hướng chính">
+        <a class="active" href="#home">Hôm nay</a>
+        <a href="#topics">Chủ đề</a>
+        <a href="#progress">Tiến độ</a>
+      </nav>
+
+      <button class="streak-pill" id="streakButton" type="button" title="Chuỗi ngày học">
+        <span>🔥</span>
+        <strong id="streakCount">1</strong> ngày
+      </button>
+    </header>
+
+    <main id="home">
+      <section class="hero">
+        <img
+          class="hero-image"
+          src="assets/me-va-sunny.png"
+          alt="Mẹ và bé Sunny vui vẻ bên nhau"
+        />
+        <div class="hero-copy">
+          <span class="eyebrow">🌈 Mẹ và Sunny cùng khám phá!</span>
+          <h1>Mẹ và Sunny<br /><em>học Tiếng Anh.</em></h1>
+          <p>
+            Những từ và câu thật gần gũi để mẹ có thể dùng ngay trong từng khoảnh khắc bên con.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-button" id="startLesson" type="button">
+              <span>Bắt đầu học cùng Sunny</span>
+              <span class="button-arrow">→</span>
+            </button>
+            <span class="gentle-note">Không áp lực · Hoàn toàn miễn phí</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="daily-section section-shell">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">BÀI HỌC HÔM NAY</span>
+            <h2>Một buổi sáng thật vui ☀️</h2>
+          </div>
+          <div class="lesson-progress">
+            <span id="progressLabel">0 / 50 từ</span>
+            <div class="progress-track">
+              <span id="progressBar"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="daily-grid">
+          <article class="featured-lesson">
+            <div class="lesson-art" aria-hidden="true">
+              <span class="sun">☀️</span>
+              <span class="cloud cloud-one">☁</span>
+              <span class="cloud cloud-two">☁</span>
+              <div class="bed">🛏️</div>
+              <span class="sparkle sparkle-one">✦</span>
+              <span class="sparkle sparkle-two">✦</span>
+            </div>
+            <div class="lesson-info">
+              <span class="lesson-number">CHỦ ĐỀ 01 · BUỔI SÁNG</span>
+              <h3>Good morning!</h3>
+              <p>Chào buổi sáng!</p>
+              <div class="lesson-meta">
+                <span>🕐 Học theo nhịp của mẹ</span>
+                <span>💬 50 từ · 50 câu</span>
+              </div>
+              <button class="secondary-button lesson-launch" type="button">
+                <span id="lessonButtonText">Bắt đầu bài học</span>
+                <span>→</span>
+              </button>
+            </div>
+          </article>
+
+          <aside class="tip-card">
+            <div class="tip-icon">💡</div>
+            <span class="section-kicker">GỢI Ý NHỎ CHO MẸ</span>
+            <blockquote>“Good morning, my love!”</blockquote>
+            <p>
+              Sáng mai khi con vừa thức dậy, mẹ hãy mỉm cười và nói câu này nhé. Con sẽ dần ghi nhớ
+              qua giọng nói thân quen của mẹ.
+            </p>
+            <button class="listen-button" type="button" data-speak="Good morning, my love!">
+              <span class="sound-icon">♪</span> Nghe phát âm
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="topics-section section-shell" id="topics">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">HỌC THEO NHỊP SỐNG CỦA CON</span>
+            <h2>Những chủ đề gần gũi nhất</h2>
+          </div>
+          <p class="heading-note">Mỗi chủ đề là một khoảnh khắc mẹ và con vẫn trải qua hàng ngày.</p>
+        </div>
+
+        <div class="topic-grid" id="topicGrid"></div>
+      </section>
+
+      <section class="progress-section section-shell" id="progress">
+        <div class="progress-copy">
+          <span class="section-kicker">HÀNH TRÌNH CỦA MẸ</span>
+          <h2>Đi chậm một chút<br />cũng là đang tiến về phía trước.</h2>
+          <p>Mỗi câu mẹ nói hôm nay là một hạt mầm ngôn ngữ mẹ gieo cho con.</p>
+        </div>
+        <div class="stat-grid">
+          <article>
+            <span class="stat-icon peach">🌱</span>
+            <strong id="wordsLearned">0</strong>
+            <p>Từ đã học</p>
+          </article>
+          <article>
+            <span class="stat-icon yellow">☀️</span>
+            <strong id="daysLearned">1</strong>
+            <p>Ngày bên nhau</p>
+          </article>
+          <article>
+            <span class="stat-icon sage">💬</span>
+            <strong id="sentencesLearned">0</strong>
+            <p>Câu có thể nói</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="#">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 42 42"><path d="M21 35V17" /><path d="M21 22c-8 0-12-5-12-12 8 0 12 5 12 12Z" /><path d="M21 17c7 0 11-4 11-10-7 0-11 4-11 10Z" /></svg>
+        </span>
+        <span>Mẹ và Sunny <strong>học Tiếng Anh</strong></span>
+      </a>
+      <p>Được làm với thật nhiều yêu thương dành cho mẹ và bé ♡</p>
+      <p>© 2026 Mẹ và Sunny học Tiếng Anh</p>
+    </footer>
+
+    <dialog class="lesson-dialog" id="lessonDialog">
+      <div class="lesson-modal">
+        <button class="close-button" id="closeLesson" type="button" aria-label="Đóng bài học">×</button>
+        <div class="modal-top">
+          <div>
+            <span class="section-kicker" id="modalTopicLabel">CHỦ ĐỀ · BUỔI SÁNG</span>
+            <h2 id="modalHeading">Mình cùng học nhé!</h2>
+          </div>
+          <span class="modal-step" id="modalStep">1 / 50</span>
+        </div>
+        <div class="modal-progress"><span id="modalProgressBar"></span></div>
+
+        <div class="flashcard" id="flashcard">
+          <div class="word-emoji" id="wordEmoji">☀️</div>
+          <p class="word-label">TỪ CỦA HÔM NAY</p>
+          <h3 id="englishWord">morning</h3>
+          <button class="word-audio" id="wordAudio" type="button" aria-label="Nghe phát âm">♪</button>
+          <p class="phonetic" id="phonetic">/ˈmɔːr.nɪŋ/</p>
+          <p class="translation" id="vietnameseWord">buổi sáng</p>
+          <div class="example">
+            <span>Mẹ nói với con:</span>
+            <strong id="exampleSentence">Good morning, my love!</strong>
+            <small id="exampleTranslation">Chào buổi sáng, con yêu!</small>
+          </div>
+        </div>
+
+        <div class="quiz-card" id="quizCard" hidden>
+          <div class="celebration">✨</div>
+          <span class="section-kicker">MẸ NHỚ KHÔNG NÀO?</span>
+          <h3>“Wake up” nghĩa là gì?</h3>
+          <div class="quiz-options">
+            <button type="button" data-correct="false">Đi ngủ</button>
+            <button type="button" data-correct="true">Thức dậy</button>
+            <button type="button" data-correct="false">Ăn sáng</button>
+          </div>
+          <p class="quiz-feedback" id="quizFeedback" aria-live="polite"></p>
+        </div>
+
+        <div class="complete-card" id="completeCard" hidden>
+          <div class="complete-badge">🌱</div>
+          <span class="section-kicker">TUYỆT VỜI LẮM, MẸ ƠI!</span>
+          <h3>Mẹ vừa hoàn thành<br />50 từ và 50 câu tiếng Anh.</h3>
+          <p>Hôm nay hãy thử nói “Good morning, my love!” khi con thức dậy nhé.</p>
+        </div>
+
+        <div class="modal-actions">
+          <button class="back-button" id="previousWord" type="button">← Quay lại</button>
+          <button class="primary-button next-button" id="nextWord" type="button">
+            <span>Đã nhớ từ này</span><span>→</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
