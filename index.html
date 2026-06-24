@@ -26,6 +26,7 @@
       <nav aria-label="Điều hướng chính">
         <a class="active" href="#home">Hôm nay</a>
         <a href="#topics">Chủ đề</a>
+        <a href="#games">Trò chơi</a>
         <a href="#progress">Tiến độ</a>
       </nav>
 
@@ -124,6 +125,44 @@
         <div class="topic-grid" id="topicGrid"></div>
       </section>
 
+      <section class="games-section section-shell" id="games">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">CHƠI ĐỂ NHỚ NHANH HƠN</span>
+            <h2>Trò chơi luyện từ cho mẹ</h2>
+          </div>
+          <p class="heading-note">
+            Chọn một chủ đề rồi luyện vài phút. Mẹ đúng sai nhẹ nhàng thôi, miễn là mình quay lại
+            mỗi ngày.
+          </p>
+        </div>
+
+        <div class="games-panel">
+          <label class="game-topic-picker" for="gameTopicSelect">
+            <span>Chọn chủ đề để chơi</span>
+            <select id="gameTopicSelect"></select>
+          </label>
+
+          <div class="game-grid">
+            <button class="game-card" type="button" data-game="match">
+              <span class="game-icon">🧩</span>
+              <strong>Ghép thẻ Anh - Việt</strong>
+              <small>Lật và ghép đúng từ với nghĩa.</small>
+            </button>
+            <button class="game-card" type="button" data-game="write-vi">
+              <span class="game-icon">✍️</span>
+              <strong>Viết nghĩa tiếng Việt</strong>
+              <small>Nhìn từ tiếng Anh, gõ nghĩa tiếng Việt.</small>
+            </button>
+            <button class="game-card" type="button" data-game="write-en">
+              <span class="game-icon">🌱</span>
+              <strong>Viết từ tiếng Anh</strong>
+              <small>Nhìn nghĩa tiếng Việt, gõ từ tiếng Anh.</small>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section class="progress-section section-shell" id="progress">
         <div class="progress-copy">
           <span class="section-kicker">HÀNH TRÌNH CỦA MẸ</span>
@@ -210,6 +249,29 @@
           <button class="back-button" id="previousWord" type="button">← Quay lại</button>
           <button class="primary-button next-button" id="nextWord" type="button">
             <span>Đã nhớ từ này</span><span>→</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="game-dialog" id="gameDialog">
+      <div class="game-modal">
+        <button class="close-button" id="closeGame" type="button" aria-label="Đóng trò chơi">×</button>
+        <div class="modal-top">
+          <div>
+            <span class="section-kicker" id="gameTopicLabel">TRÒ CHƠI</span>
+            <h2 id="gameTitle">Mình cùng chơi nhé!</h2>
+          </div>
+          <span class="modal-step" id="gameScore">0 đúng</span>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+        <p class="game-feedback" id="gameFeedback" aria-live="polite"></p>
+
+        <div class="modal-actions">
+          <button class="back-button" id="newGameRound" type="button">↻ Ván mới</button>
+          <button class="primary-button next-button" id="closeGameDone" type="button">
+            <span>Xong rồi</span><span>♡</span>
           </button>
         </div>
       </div>

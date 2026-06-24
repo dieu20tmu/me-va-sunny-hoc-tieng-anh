@@ -925,11 +925,24 @@ const completeCard = document.querySelector("#completeCard");
 const nextButton = document.querySelector("#nextWord");
 const previousButton = document.querySelector("#previousWord");
 const toast = document.querySelector("#toast");
+const gameTopicSelect = document.querySelector("#gameTopicSelect");
+const gameDialog = document.querySelector("#gameDialog");
+const gameBoard = document.querySelector("#gameBoard");
+const gameFeedback = document.querySelector("#gameFeedback");
+const gameScore = document.querySelector("#gameScore");
+const gameTitle = document.querySelector("#gameTitle");
+const gameTopicLabel = document.querySelector("#gameTopicLabel");
 
 let currentTopicIndex = 0;
 let currentIndex = 0;
 let stage = "words";
 let selectedEnglishVoice = null;
+let gameMode = "match";
+let gameTopicIndex = 0;
+let gameRoundItems = [];
+let gameQuestionIndex = 0;
+let gameCorrectCount = 0;
+let firstSelectedMatch = null;
 const savedProgress = JSON.parse(localStorage.getItem("sunny-english-progress") || "{}");
 
 function chooseEnglishVoice() {
@@ -1026,6 +1039,226 @@ function updateHomeProgress() {
       : morningProgress > 0
         ? "Học tiếp chủ đề"
         : "Bắt đầu chủ đề";
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normalizeAnswer(value) {
+  return String(value)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function shuffleItems(items) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
+function getGameItems(topicIndex, count) {
+  const topic = topics[topicIndex];
+  const progress = getTopicProgress(topicIndex);
+  const learnedCount = progress > 0 ? progress : topic.items.length;
+  return shuffleItems(topic.items.slice(0, learnedCount)).slice(0, count);
+}
+
+function renderGameTopicOptions() {
+  gameTopicSelect.innerHTML = topics
+    .map((topic, index) => `<option value="${index}">${escapeHtml(topic.icon)} ${escapeHtml(topic.title)}</option>`)
+    .join("");
+}
+
+function updateGameHeader(title) {
+  const topic = topics[gameTopicIndex];
+  gameTopicLabel.textContent = `${topic.icon} ${topic.title}`;
+  gameTitle.textContent = title;
+  gameScore.textContent = `${gameCorrectCount} đúng`;
+}
+
+function openGame(mode) {
+  gameMode = mode;
+  gameTopicIndex = Number(gameTopicSelect.value || 0);
+  gameCorrectCount = 0;
+  gameQuestionIndex = 0;
+  firstSelectedMatch = null;
+  gameFeedback.textContent = "";
+
+  if (mode === "match") {
+    startMatchGame();
+  } else {
+    startWritingGame();
+  }
+
+  gameDialog.showModal();
+}
+
+function startMatchGame() {
+  gameRoundItems = getGameItems(gameTopicIndex, 6);
+  updateGameHeader("Ghép thẻ Anh - Việt");
+  gameFeedback.textContent = "Mẹ chọn một thẻ tiếng Anh rồi chọn nghĩa tiếng Việt tương ứng nhé.";
+
+  const cards = shuffleItems(
+    gameRoundItems.flatMap((item, index) => [
+      { id: index, type: "en", label: item.word, sub: "Tiếng Anh" },
+      { id: index, type: "vi", label: item.meaning, sub: "Tiếng Việt" },
+    ]),
+  );
+
+  gameBoard.innerHTML = `
+    <div class="match-grid">
+      ${cards
+        .map(
+          (card) => `
+            <button
+              class="match-card"
+              type="button"
+              data-match-id="${card.id}"
+              data-match-type="${card.type}"
+            >
+              ${escapeHtml(card.label)}
+              <small>${escapeHtml(card.sub)}</small>
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function handleMatchCard(card) {
+  if (card.classList.contains("matched")) return;
+
+  if (!firstSelectedMatch) {
+    firstSelectedMatch = card;
+    card.classList.add("selected");
+    return;
+  }
+
+  if (firstSelectedMatch === card) {
+    card.classList.remove("selected");
+    firstSelectedMatch = null;
+    return;
+  }
+
+  const isPair =
+    firstSelectedMatch.dataset.matchId === card.dataset.matchId &&
+    firstSelectedMatch.dataset.matchType !== card.dataset.matchType;
+
+  if (isPair) {
+    firstSelectedMatch.classList.remove("selected");
+    firstSelectedMatch.classList.add("matched");
+    card.classList.add("matched");
+    gameCorrectCount += 1;
+    gameScore.textContent = `${gameCorrectCount} đúng`;
+    gameFeedback.textContent =
+      gameCorrectCount === gameRoundItems.length
+        ? "Tuyệt vời! Mẹ ghép hết rồi. Bấm “Ván mới” để luyện tiếp nhé."
+        : "Đúng rồi mẹ ơi! Ghép tiếp nào.";
+    firstSelectedMatch = null;
+    return;
+  }
+
+  card.classList.add("selected");
+  gameFeedback.textContent = "Chưa đúng rồi, mẹ thử lại cặp khác nhé.";
+  window.setTimeout(() => {
+    firstSelectedMatch?.classList.remove("selected");
+    card.classList.remove("selected");
+    firstSelectedMatch = null;
+  }, 650);
+}
+
+function startWritingGame() {
+  const title =
+    gameMode === "write-vi"
+      ? "Viết nghĩa tiếng Việt"
+      : "Viết từ tiếng Anh";
+  gameRoundItems = getGameItems(gameTopicIndex, 8);
+  updateGameHeader(title);
+  renderWritingQuestion();
+}
+
+function renderWritingQuestion() {
+  const item = gameRoundItems[gameQuestionIndex];
+  if (!item) {
+    gameBoard.innerHTML = `
+      <div class="writing-game">
+        <span class="writing-kicker">HOÀN THÀNH</span>
+        <p class="writing-prompt">${gameCorrectCount}/${gameRoundItems.length} câu đúng</p>
+        <p class="answer-hint">Mẹ làm tốt lắm. Mình chơi lại một ván nhỏ nữa nhé?</p>
+      </div>
+    `;
+    gameFeedback.textContent = "Bấm “Ván mới” để luyện thêm.";
+    return;
+  }
+
+  const isVietnameseAnswer = gameMode === "write-vi";
+  const prompt = isVietnameseAnswer ? item.word : item.meaning;
+  const placeholder = isVietnameseAnswer ? "Gõ nghĩa tiếng Việt..." : "Gõ từ tiếng Anh...";
+  const helper = isVietnameseAnswer
+    ? "Nhìn từ tiếng Anh và viết nghĩa tiếng Việt."
+    : "Nhìn nghĩa tiếng Việt và viết lại từ tiếng Anh.";
+
+  gameScore.textContent = `${gameCorrectCount}/${gameRoundItems.length} đúng`;
+  gameFeedback.textContent = helper;
+  gameBoard.innerHTML = `
+    <div class="writing-game">
+      <span class="writing-kicker">Câu ${gameQuestionIndex + 1}/${gameRoundItems.length}</span>
+      <p class="writing-prompt">${escapeHtml(prompt)}</p>
+      <input id="gameAnswerInput" type="text" autocomplete="off" placeholder="${escapeHtml(placeholder)}" />
+      <div class="writing-actions">
+        <button class="check-answer" id="checkGameAnswer" type="button">Kiểm tra</button>
+        <button class="skip-answer" id="skipGameAnswer" type="button">Bỏ qua</button>
+      </div>
+      <p class="answer-hint" id="answerHint"></p>
+    </div>
+  `;
+  document.querySelector("#gameAnswerInput").focus();
+}
+
+function checkWritingAnswer() {
+  const item = gameRoundItems[gameQuestionIndex];
+  const input = document.querySelector("#gameAnswerInput");
+  const answerHint = document.querySelector("#answerHint");
+  if (!item || !input || !answerHint) return;
+
+  const expected = gameMode === "write-vi" ? item.meaning : item.word;
+  const userAnswer = normalizeAnswer(input.value);
+  const expectedAnswer = normalizeAnswer(expected);
+
+  if (!userAnswer) {
+    answerHint.textContent = "Mẹ gõ câu trả lời trước nhé.";
+    return;
+  }
+
+  if (userAnswer === expectedAnswer) {
+    gameCorrectCount += 1;
+    answerHint.textContent = "Đúng rồi! Mẹ nhớ nhanh quá.";
+    gameQuestionIndex += 1;
+    window.setTimeout(renderWritingQuestion, 650);
+    return;
+  }
+
+  answerHint.textContent = `Chưa đúng. Đáp án là: ${expected}`;
+}
+
+function skipWritingAnswer() {
+  const item = gameRoundItems[gameQuestionIndex];
+  if (item) {
+    const expected = gameMode === "write-vi" ? item.meaning : item.word;
+    gameFeedback.textContent = `Đáp án là: ${expected}`;
+  }
+  gameQuestionIndex += 1;
+  renderWritingQuestion();
 }
 
 function renderWord() {
@@ -1126,6 +1359,53 @@ topicGrid.addEventListener("click", (event) => {
   if (card) openLesson(card.dataset.topic);
 });
 
+document.querySelectorAll("[data-game]").forEach((button) => {
+  button.addEventListener("click", () => openGame(button.dataset.game));
+});
+
+document.querySelector("#closeGame").addEventListener("click", () => gameDialog.close());
+
+document.querySelector("#closeGameDone").addEventListener("click", () => gameDialog.close());
+
+document.querySelector("#newGameRound").addEventListener("click", () => {
+  gameCorrectCount = 0;
+  gameQuestionIndex = 0;
+  firstSelectedMatch = null;
+  gameFeedback.textContent = "";
+  if (gameMode === "match") {
+    startMatchGame();
+  } else {
+    startWritingGame();
+  }
+});
+
+gameDialog.addEventListener("click", (event) => {
+  if (event.target === gameDialog) gameDialog.close();
+});
+
+gameBoard.addEventListener("click", (event) => {
+  const matchCard = event.target.closest(".match-card");
+  if (matchCard) {
+    handleMatchCard(matchCard);
+    return;
+  }
+
+  if (event.target.closest("#checkGameAnswer")) {
+    checkWritingAnswer();
+    return;
+  }
+
+  if (event.target.closest("#skipGameAnswer")) {
+    skipWritingAnswer();
+  }
+});
+
+gameBoard.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target.id === "gameAnswerInput") {
+    checkWritingAnswer();
+  }
+});
+
 document.querySelector("#streakButton").addEventListener("click", () => {
   showToast("Mẹ và Sunny đã bắt đầu một hành trình thật vui! 🔥");
 });
@@ -1150,5 +1430,6 @@ practicalExamples.forEach((examples, index) => {
 });
 
 renderTopics();
+renderGameTopicOptions();
 updateHomeProgress();
 prepareEnglishVoice();
