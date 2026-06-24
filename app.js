@@ -910,7 +910,7 @@ const topics = topicDefinitions.map((topic) => ({
     return {
       ...term,
       emoji: topic.emojis[index % topic.emojis.length],
-      phonetic: "Chạm ♪ để nghe phát âm",
+      phonetic: "Bấm ♪ để nghe giọng Anh chậm, rõ",
       example: sentence.word,
       exampleVi: sentence.meaning,
     };
@@ -929,7 +929,31 @@ const toast = document.querySelector("#toast");
 let currentTopicIndex = 0;
 let currentIndex = 0;
 let stage = "words";
+let selectedEnglishVoice = null;
 const savedProgress = JSON.parse(localStorage.getItem("sunny-english-progress") || "{}");
+
+function chooseEnglishVoice() {
+  if (!("speechSynthesis" in window)) return null;
+
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoices = voices.filter((voice) => /^en([-_]|$)/i.test(voice.lang || ""));
+
+  selectedEnglishVoice =
+    englishVoices.find((voice) => /google us english/i.test(voice.name)) ||
+    englishVoices.find((voice) => /samantha|alex|jenny|aria|natural/i.test(voice.name)) ||
+    englishVoices.find((voice) => /^en[-_]US/i.test(voice.lang || "")) ||
+    englishVoices.find((voice) => /^en[-_]GB/i.test(voice.lang || "")) ||
+    englishVoices[0] ||
+    null;
+
+  return selectedEnglishVoice;
+}
+
+function prepareEnglishVoice() {
+  if (!("speechSynthesis" in window)) return;
+  chooseEnglishVoice();
+  window.speechSynthesis.onvoiceschanged = chooseEnglishVoice;
+}
 
 function getTopicProgress(index) {
   return Math.min(Number(savedProgress[index] || 0), 50);
@@ -956,16 +980,26 @@ function renderTopics() {
     .join("");
 }
 
-function speak(text) {
+function speak(text, options = {}) {
   if (!("speechSynthesis" in window)) {
     showToast("Trình duyệt này chưa hỗ trợ phát âm.");
     return;
   }
+
+  const voice = selectedEnglishVoice || chooseEnglishVoice();
+
+  if (!voice) {
+    showToast("Đang tải giọng đọc tiếng Anh, mẹ bấm lại sau 1 giây nhé.");
+    window.setTimeout(() => speak(text, options), 700);
+    return;
+  }
+
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.78;
-  utterance.pitch = 1.05;
+  utterance.voice = voice;
+  utterance.lang = voice.lang || "en-US";
+  utterance.rate = options.slow ? 0.68 : 0.76;
+  utterance.pitch = 1;
   window.speechSynthesis.speak(utterance);
 }
 
@@ -1055,7 +1089,7 @@ dialog.addEventListener("click", (event) => {
 });
 
 document.querySelector("#wordAudio").addEventListener("click", () => {
-  speak(topics[currentTopicIndex].items[currentIndex].word);
+  speak(topics[currentTopicIndex].items[currentIndex].word, { slow: true });
 });
 
 document.querySelectorAll("[data-speak]").forEach((button) => {
@@ -1117,3 +1151,4 @@ practicalExamples.forEach((examples, index) => {
 
 renderTopics();
 updateHomeProgress();
+prepareEnglishVoice();
